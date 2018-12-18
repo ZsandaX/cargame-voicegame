@@ -1,0 +1,71 @@
+@media (min-width: 288px) {
+    #pool img {
+        transform: scale(0.2) translate(-50%, -100%);
+    }
+}
+
+@media (min-width: 576px) {
+    #pool img {
+        transform: scale(0.4) translate(-50%, -100%);
+    }
+}
+
+@media (min-width: 768px) {
+    #pool img {
+        transform: scale(0.6) translate(-50%, -100%);
+    }
+}
+
+@media (min-width: 992px) {
+    #pool img {
+        transform: scale(0.8) translate(-50%, -100%);
+    }
+}
+
+@media (min-width: 1200px) {
+    #pool img {
+        transform: scale(1.0) translate(-50%, -100%);
+        max-height: 90px;
+        max-width: 66px;
+    }
+}
+
+body {
+    background-image: url(../img/eat_bg.svg);
+    background-size: contain;
+    background-position: center;
+    background-repeat: repeat;
+    font-size: 2rem;
+}
+
+#food {
+    bottom: 10%;
+}
+
+.check {
+    color: red;
+    border: 10px solid #880000;
+    border-radius: 10px;
+}
+
+.disable {
+    pointer-events: none;
+}
+
+#next {
+    display: none;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    background-image: radial-gradient(circle 248px at center, #16d9e3 0%, #30c7ec 47%, #46aef7 100%);
+}
+
+.icon {
+    cursor: pointer;
+}
+
+.count {
+    text-align: center;
+    background: black;
+    color: red;
+    font-size: 30rem;
+}

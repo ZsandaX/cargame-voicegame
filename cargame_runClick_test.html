@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>
+    <?=$_SESSION[loggedIN]?>
+  </title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <script src="https://code.jquery.com/jquery-3.3.1.js" type="text/javascript" Charset="Big5"></script>
+  <script src="js/imgCheckbox/jquery.imgcheckbox_del.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+    crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+    crossorigin="anonymous"></script>
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+    crossorigin="anonymous">
+  <script src="js/imgCheckbox/jquery.imgcheckbox_del.js"></script>
+  <style>
+    table {
+      border: 1px solid red;
+    }
+
+    td {
+      border: 1px solid blue;
+      padding: 10px;
+
+      height: 70%;
+    }
+
+    /* img
+            {
+                height: 52px;
+            } */
+
+    #img_table {
+      border: 10px solid #0000CD;
+
+      height: 50px;
+      width: 40px;
+    }
+
+    #finish_button {
+      height: 100px;
+      background-image: url(img/next.png);
+      background-size: contain;
+      background-repeat: no-repeat;
+      display: none;
+    }
+
+    #game-container {
+
+      width: 100%;
+      height: 100%;
+      position: fixed;
+
+      background-size: cover;
+      background-repeat: no-repeat;
+      /*background-image:url(img/car_bg.png);*/
+      border: 81px solid #888888;
+      outline: 13px dashed #FFAA33;
+      outline-offset: -47px;
+
+      /*  background-color:	#00FFFF;*/
+    }
+
+    #img-area {
+      width: 950px;
+      height: 850px;
+      /*  outline:#000 solid 3px;
+              outline-offset:1px;*/
+      /*background-color:#55AA00	;*/
+    }
+  </style>
+  <style>
+    .car {
+      top: -81px;
+      left: -81px;
+      width: 81px;
+      height: 81px;
+      position: absolute;
+      animation: run 5s linear backwards;
+    }
+
+    .topTrack {
+      --start-top: 0%;
+      --end-top: 0%;
+    }
+
+    .bottomTrack {
+      --start-top: calc(100% - 81px);
+      --end-top: calc(100% - 81px);
+    }
+
+    .leftTrack {
+      --start-left: 0%;
+      --end-left: 0%;
+    }
+
+    .rightTrack {
+      --start-left: calc(100% - 81px);
+      --end-left: calc(100% - 81px);
+    }
+
+    .runLeft {
+      --start-left: calc(100% - 81px);
+      --end-left: 0%;
+    }
+
+    .runRight {
+      --start-left: 0%;
+      --end-left: calc(100% - 81px);
+    }
+
+    .runTop {
+      --start-top: calc(100% - 81px);
+      --end-top: 0%;
+    }
+
+    .runBottom {
+      --start-top: 0%;
+      --end-top: calc(100% - 81px);
+    }
+
+    @keyframes run {
+      0% {
+        left: var(--start-left);
+        top: var(--start-top);
+      }
+      100% {
+        left: var(--end-left);
+        top: var(--end-top);
+        /*opacity:1;*/
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container-fulid">
+    <div class=" col-md-12  col-sm-12 " id="game-container">
+
+      <div class="row">
+        <div class=" col-md-2 col-sm-2"> </div>
+        <h3 class="col-md-5 col-sm-5" face="DFKai-sb">
+          <b>練習題3，請你點選和藍框不一樣的車子，</br>沒動的和移動的車不一樣的都要刪除，正確且愈快愈好~</br>等小精靈出現時，請點選綠色鍵到下一題。</b>
+        </h3>
+        <table class=" col-md-1 col-sm-1" id="img_table">
+          <tbody>
+            <tr>
+              <td>
+                <img id="template_img" src="img/car4.png">
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div class=" col-md-4 col-sm-4"> </div>
+      </div>
+      <div class="row">
+
+        <div class=" offset-xl-2 col-xl-10 col-md-12 col-sm-10" id="game_table"></div>
+
+      </div>
+      <div class="row">
+
+        <input class="w3-button offset-10 col-2 fixed-bottom" type="button" id="finish_button" value=""
+        />
+
+      </div>
+
+    </div>
+  </div>
+
+
+
+
+
+  <script>
+    //-----時間計時器
+    var timeLeft = 600;
+    var elem = document.getElementById('some_div');
+    var timerId = setInterval(countdown, 1000);
+    var endtime;
+
+    function countdown() {
+      if (timeLeft == -1) {
+        clearTimeout(timerId);
+
+      } else {
+        //elem.innerHTML = timeLeft + ' seconds remaining';
+        timeLeft--;
+      }
+    }
+    //------table 產生
+    var arr, body, tab, tr, td, tn, row, col, nam = 0;
+    arr = [];
+    var click_arr = [];
+
+    for (var i = 0; i < 16; i++) {
+      if (i < 10) {
+        var x = Math.floor(Math.random() * 3);
+        arr[i] = x;
+      }
+      if (i >= 10) {
+        arr[i] = 3;
+      }
+    }
+    //***********************************************************************************
+    console.log(arr);
+    //------打亂陣列內容
+    function shuffle(a) {
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+    shuffle(arr);
+    console.log(arr);
+    ////////////*************************************************************
+    //*****************img/char6.png//設定為預設對的選項
+    var img = ["img/car1.png", "img/car2.png", "img/car3.png", "img/car4.png"]
+    body = $('div#game_table');
+    tab = document.createElement('table');
+
+    for (row = 0; row < (arr.length / 8); row++) {
+      tr = document.createElement('tr');
+      for (col = 0; col < (arr.length / 2); col++) {
+        td = document.createElement('td');
+        tn = document.createElement('img');
+        src = document.createAttribute('src');
+        src.value = img[arr[nam]];
+        tn.className = "col";
+        tn.setAttributeNode(src);
+
+
+
+        nam++;
+        td.id = (row * 8) + col;
+        $(td).attr('name', 0);
+        td.name = 0;
+        var num_id = td.id;
+        var num_name = td.name;
+        td.appendChild(tn);
+        tr.appendChild(td);
+      }
+      tab.appendChild(tr);
+    }
+    body.append(tab);
+    tr = document.getElementsByTagName('tr');
+
+    $("td").click(function () {
+
+
+      var select = $(this).attr("id");
+
+      /* click_arr.push(select) */
+      ;
+      if ($(this).attr("name") == 1) {
+        $(this).attr('name', 0);
+      } else {
+        $(this).attr('name', 1);
+      }
+
+      /* console.log(click_arr) */
+      ;
+
+    });
+
+    $('#finish_button').click(function () {
+
+      endtime = 600 - (timeLeft);
+
+      $("td").each(function () {
+        if ($(this).attr("name") == 1)
+          click_arr.push($(this).attr("id"));
+      });
+      console.log(click_arr);
+      var correct_nam = 0;
+      var error_nam = 0;
+      for (var i = 0; i < click_arr.length; i++) {
+
+
+        if (arr[click_arr[i]] == 3) {
+          console.log("test");
+          console.log(i);
+          console.log(arr[click_arr[i]]);
+          console.log("test...");
+          //正確數量的變數
+
+          error_nam = error_nam + 1;
+        }
+        if (arr[click_arr[i]] != 3) {
+          correct_nam = correct_nam + 1;
+        }
+
+      }
+
+      alert("correct_nam:" + correct_nam + "error_nam:" + error_nam);
+      /*var inputdata_id=$('title').text();
+      var miss_nam=6-correct_nam;
+      var score=(correct_nam)-(error_nam)-(miss_nam);
+      var json_data={
+        ex:1,
+        id:inputdata_id,
+        test_time:endtime,
+        correct:correct_nam,
+        error:error_nam,
+        miss:miss_nam,
+        score:score
+      };
+
+      $.ajax({
+                url: 'datainput.php',
+                type : "POST",
+                dataType : 'json',
+                data : json_data,
+                success : function(result)
+                {
+                  console.log(result);
+                },
+                error: function(result)
+                {
+                  console.log(result);
+                }
+            });
+      if(correct_nam==6)
+      {
+        console.log("success");
+        console.log(inputdata_id +":"+ endtime+":" + correct_nam+":" + error_nam);
+        window.location='a_f_1.php';
+      }
+      else
+      {
+        console.log("error");
+        console.log(inputdata_id +":"+ endtime+":" + correct_nam+":" + error_nam);
+        alert("失敗");
+        window.location='end_test.html';
+      }
+      click_arr=[];*/
+
+    });
+    $("#game_table img").imgCheckbox({
+      onload: function () {
+        // Do something fantastic!
+      },
+      onclick: function (el) {
+        var isChecked = el.hasClass("imgChked"),
+          imgEl = el.children()[0]; // the img element
+
+        console.log(imgEl.name + " is now " + (isChecked ? "checked" : "not-checked") + "!");
+      }
+    });
+  </script>
+  <script>
+    $.fn.extend({
+      addCar: function (carname, direction, position) {
+        var car = $("<img></img>").attr("src", `img/${carname}.png`)
+          .addClass("car").addClass(direction).addClass(position);
+        car.on("click", (e) => {
+          $(e.target).hide();
+        });
+        return $(this).append(car);
+      }
+    });
+
+    var seconds = 0;
+    var timer = setInterval(count, 1000);
+
+    function count() {
+      if (seconds == 40) {
+        clearTimeout(timer);
+        console.log("選擇數" + $(".car:hidden").length);
+        console.log("正確數" + $(".car:hidden[src!='img/car4.png']").length);
+        console.log("錯誤數" + $(".car:hidden[src='img/car4.png']").length);
+        console.log("遺漏數" + $(".car:visible[src!='img/car4.png']").length);
+        $('#finish_button').show();
+      } else {
+        seconds++;
+        console.log(seconds);
+
+        switch (seconds) {
+          case 3:
+            $(".container-fulid").addCar("car2", "runBottom", "rightTrack");
+            break;
+          case 7:
+            $(".container-fulid").addCar("car1", "runLeft", "bottomTrack");
+            $(".container-fulid").addCar("car2", "runBottom", "leftTrack");
+            break;
+          case 11:
+            $(".container-fulid").addCar("car4", "runRight", "bottomTrack");
+            break;
+          case 15:
+            $(".container-fulid").addCar("car1", "runLeft", "bottomTrack");
+            $(".container-fulid").addCar("car4", "runTop", "rightTrack");
+            break;
+          case 20:
+            $(".container-fulid").addCar("car3", "runTop", "leftTrack");
+            break;
+        }
+      }
+    }
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,325 @@
+<html>
+
+<head>
+    <title>
+        <?=$_SESSION[loggedIN]?>
+    </title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+        crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="css/voicegame.css">
+    <script>
+        var animalArr = [];
+        var foodArr = [];
+        var animal_number = 5;
+        var food_number = 20;
+        var binary_answer = [];
+        var user_answer = [];
+        var radius = 10;
+        var targets = ['rooster', 'horse'];
+        var timeLeft = 0;
+
+
+        if (window.innerWidth > 576) {
+            var radius = 20;
+        }
+        if (window.innerWidth > 768) {
+            var radius = 30;
+        }
+        if (window.innerWidth > 992) {
+            var radius = 40;
+        }
+        if (window.innerWidth > 1200) {
+            var radius = 50;
+        }
+
+        function createIcon() {
+            var iconArr = [];
+            var icons = ['banana', 'bone', 'fish', 'grass', 'insect'];
+            for (let icon of icons) {
+                iconArr.push(icon);
+                iconArr.push(icon);
+                iconArr.push(icon);
+                iconArr.push(icon);
+            }
+            shuffle(iconArr);
+            console.log(iconArr);
+            return iconArr;
+        }
+
+        function randomPoint({
+            w,
+            h
+        }) {
+            const x = parseInt(Math.random() * w);
+            const y = parseInt(Math.random() * h);
+            const r = radius;
+            return {
+                x,
+                y,
+                r
+            };
+        }
+
+        function testOverlay(pointA, pointB) {
+            const xGap = Math.abs(pointA.x - pointB.x);
+            const yGap = Math.abs(pointA.y - pointB.y);
+            const distance = Math.sqrt(xGap * xGap + yGap * yGap);
+            const rGap = pointA.r + pointB.r;
+            return distance <= rGap;
+        }
+
+        function testAvailable(pointArr, newPoint) {
+            let arr = Array.from(pointArr);
+            let aval = true;
+            while (arr.length > 0) {
+                let lastPoint = arr.pop();
+                if (testOverlay(lastPoint, newPoint)) {
+                    aval = false;
+                    break;
+                }
+            }
+            return aval;
+        }
+
+        function createView(elem, number, iconArr) {
+            var pointArr = [];
+            console.log($(elem).width(), $(elem).height());
+            for (let i = 0; i < number; i++) {
+                let point = randomPoint({
+                    w: $(elem).width(),
+                    h: $(elem).height()
+                });
+                let check = testAvailable(pointArr, point);
+                if (check) {
+                    pointArr.push(point);
+                } else {
+                    i--;
+                }
+            }
+            console.log(pointArr);
+            for (let key in pointArr) {
+                let icon = $("<img></img>").css("position", "absolute")
+                    .css("left", pointArr[key].x)
+                    .css("top", pointArr[key].y)
+                    .attr("src", "img/" + iconArr[key] + ".png")
+                    .attr("class", `icon img-fluid`);
+
+                $(elem).append(icon);
+            }
+            console.log(iconArr);
+            return pointArr;
+        }
+
+        function shuffle(arr) {
+            let n = arr.length,
+                random;
+            while (0 != n) {
+                random = (Math.random() * n--) >>> 0; // 无符号右移位运算符向下取整
+                [arr[n], arr[random]] = [arr[random], arr[n]] // ES6的结构赋值实现变量互换
+            }
+            return arr;
+        }
+
+        function countdown() {
+            switch (timeLeft) {
+                case 0:
+                    console.log(timeLeft);
+                    playVoice(targets[0]);
+                    $("#food").hide();
+                    timeLeft++;
+                    break;
+                case 2:
+                    console.log(timeLeft);
+                    playVoice("doorbell");
+                    $("#food").show();
+                    timeLeft++;
+                    break;
+                case 5:
+                    console.log(timeLeft);
+                    checkAnswer(targets[0], 1);
+
+                    playVoice(targets[1]);
+                    $("#food").hide();
+                    timeLeft++;
+                    break;
+                case 7:
+                    console.log(timeLeft);
+                    playVoice("doorbell");
+                    $("#food").show();
+                    timeLeft++;
+                    break;
+                case 10:
+                    console.log(timeLeft);
+                    clearTimeout(timerId);
+                    checkAnswer(targets[1], 2);
+                    $(".icon").addClass("disable");
+                    $("body").addClass("count").text(3);
+                    timeLeft++;
+                    break;
+                case 11:
+                    console.log(timeLeft);
+                    $("body").text(2);
+                    timeLeft++;
+                    break;
+                case 12:
+                    console.log(timeLeft);
+                    $("body").text(1);
+                    timeLeft++;
+                    break;
+                case 13:
+                    //window.location.replace("voicegame_2.html");
+                    $.ajax({
+                        url: 'datainput.php',
+                        type: "POST",
+                        dataType: 'json',
+                        data: json_data,
+                        success: function (result) {
+                            console.log(result);
+                        },
+                        error: function (result) {
+                            console.log(result);
+                        }
+                    });
+                    if (correct_nam == 6 && error == 0) {
+                        window.location = 'C1-2-test.php';
+                    } else {
+                        window.location = 'C1-1-test2.php';
+                    }
+                    clearTimeout(timerId);
+                    break;
+                default:
+                    console.log(timeLeft);
+                    timeLeft++;
+                    break;
+            }
+        }
+
+        function checkAnswer(target, num) {
+            var animal = {
+                ape: "banana",
+                cat: "fish",
+                dog: "bone",
+                horse: "grass",
+                rooster: "insect"
+            };
+            if (num == 1) {
+                json_data = {
+                    ex: 17,
+                    id: inputdata_id,
+                    correct1: $(`#animal>.check[src="img/${target}.png"]`).length + $(
+                        `#food>.check[src="img/${animal[target]}.png"]`).length,
+                    error1: $(`#animal>.check[src!="img/${target}.png"]`).length + $(
+                        `#food>.check[src!="img/${animal[target]}.png"]`).length,
+                    miss1: $(`#animal>.icon:not(.check)[src="img/${target}.png"]`).length + $(
+                        `#food>.icon:not(.check)[src="img/${animal[target]}.png"]`).length,
+                };
+                json_data.score1 = json_data.correct1 - json_data.error1 - json_data.miss1;
+            } else if (num == 2) {
+                json_data.correct2 = $(`#animal>.check[src="img/${target}.png"]`).length + $(
+                    `#food>.check[src="img/${animal[target]}.png"]`).length;
+
+                json_data.error2 = $(`#animal>.check[src!="img/${target}.png"]`).length + $(
+                    `#food>.check[src!="img/${animal[target]}.png"]`).length;
+                json_data.miss2 = $(`#animal>.icon:not(.check)[src="img/${target}.png"]`).length + $(
+                    `#food>.icon:not(.check)[src="img/${animal[target]}.png"]`).length;
+                json_data.score2 = json_data.correct2 - json_data.error2 - json_data.miss2;
+            }
+
+            console.log(json_data);
+
+            console.log("animal:");
+            console.log("選擇數", $("#animal>.check").length);
+            console.log("正確數", $(`#animal>.check[src="img/${target}.png"]`).length);
+            console.log("錯誤數", $(`#animal>.check[src!="img/${target}.png"]`).length);
+            console.log("遺漏數", $(`#animal>.icon:not(.check)[src="img/${target}.png"]`).length);
+
+            console.log("food:");
+            console.log("選擇數", $("#food>.check").length);
+            console.log("正確數", $(`#food>.check[src="img/${animal[target]}.png"]`).length);
+            console.log("錯誤數", $(`#food>.check[src!="img/${animal[target]}.png"]`).length);
+            console.log("遺漏數", $(`#food>.icon:not(.check)[src="img/${animal[target]}.png"]`).length);
+            $(".icon").removeClass("check");
+        }
+
+        function playVoice(voice) {
+            $(`#${voice}`)[0].play();
+        }
+    </script>
+</head>
+
+<body>
+    <div class="container-fluid">
+        <audio id="ape">
+            <source src="mp3/ape.mp3" type="audio/mp3">
+        </audio>
+        <audio id="cat">
+            <source src="mp3/cat.mp3" type="audio/mp3">
+        </audio>
+        <audio id="dog">
+            <source src="mp3/dog.mp3" type="audio/mp3">
+        </audio>
+        <audio id="horse">
+            <source src="mp3/horse.mp3" type="audio/mp3">
+        </audio>
+        <audio id="rooster">
+            <source src="mp3/rooster.mp3" type="audio/mp3">
+        </audio>
+        <audio id="doorbell">
+            <source src="mp3/doorbell.mp3" type="audio/mp3">
+        </audio>
+        <div class="offset-1 col-6 h-50" id="animal"></div>
+        <div class="offset-1 col-10 h-25 fixed-bottom" id="food"></div>
+
+        <!-- Modal -->
+        <div id="myModal" class="modal" tabindex="-1" role="dialog">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLongTitle">正式題3</h5>
+                    </div>
+                    <div class="modal-body">
+                        請你專心聽是什麼動物的叫聲，
+                        <br>點選發出聲音的動物
+                    </div>
+                    <div class="modal-footer">
+                        <button id="start" type="button" class="btn btn-primary" data-dismiss="modal">點我開始</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+            $('#myModal').modal('show');
+            //產生動物
+            radius += 30;
+            animalArr = ['ape', 'cat', 'dog', 'horse', 'rooster'];
+            createView('#animal', animal_number, animalArr);
+            //產生食物      
+            radius -= 30;
+            foodArr = createIcon();
+            createView('#food', food_number, foodArr);
+            var timerId;
+            $("#start").on("click", (e) => {
+                $('#myModal').modal('hide');
+                timerId = setInterval(countdown, 1000);
+            });
+            $("#animal>.icon").on("click", (e) => {
+                $("#animal>.icon").removeClass("check");
+                $(e.target).addClass("check");
+            });
+            $("#food>.icon").on("click", (e) => {
+                $(e.target).toggleClass("check");
+            });
+        </script>
+    </div>
+</body>
+
+</html>
